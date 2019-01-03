@@ -1,3 +1,6 @@
+#Andrew Piroli
+#See LICENSE for License details
+#MIT License
 import argparse
 
 parser = argparse.ArgumentParser()
