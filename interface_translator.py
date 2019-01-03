@@ -89,6 +89,7 @@ def trans_config():
 		else:
 			print("New interface discovered!")
 			old_int.append(config[idx].strip())
+			print(config[idx].strip())
 			answer = input("Enter new interface name or pass for passthru: interface ").strip()
 			if answer.lower().startswith("pass"):
 				new_int.append(config[idx].strip())
