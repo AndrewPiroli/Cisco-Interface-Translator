@@ -66,9 +66,9 @@ def trans_config():
 		else:
 			print("New interface discovered!")
 			old_int.append(config[idx].strip())
-			answer = input("Enter new interface name or pass for passthru: ").strip()
+			answer = input("Enter new interface name or pass for passthru: interface ").strip()
 			if answer.lower().startswith("pass"):
-				new_int.append("pass")
+				new_int.append(config[idx].strip())
 			else:
 				config[idx] = "interface " + answer + "\r\n"
 				new_int.append("interface " + answer)
@@ -90,6 +90,7 @@ def save_map():
 			print("error in save_map()")
 			print(repr(e))
 def load_map():
+	stripped_map = None
 	if args.debug:
 		print("func load_map() attempting to open map at file: " + args.map)
 	try:
@@ -104,10 +105,12 @@ def load_map():
 		if args.debug:
 			print("Error in load_map()")
 			print(repr(e))
+	if not stripped_map:
+		if args.debug:
+			print("func load_map(): error loading map")
+		return {}
 	if args.debug:
 		print("func load_map(): stripped_map: " + str(stripped_map))
-	if not stripped_map:
-		return None
 	return stripped_map
 
 config = open_config()
