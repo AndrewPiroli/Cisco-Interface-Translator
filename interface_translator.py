@@ -136,11 +136,18 @@ def load_map():
 	if args.debug:
 		print("func load_map(): stripped_map: " + str(stripped_map))
 	return stripped_map
-
+def int_array_fixup(map):
+	old_int = map.keys()
+	new_int = map.values()
+	return [old_int, new_int]
 config = open_config()
 discover(config)
 if args.map:
 	stripped_map = load_map()
+	fixup = int_array_fixup(stripped_map)
+	old_int = list(fixup[0])
+	new_int = list(fixup[1])
+	fixup = None
 trans_config()
 save_config()
 if args.save:
