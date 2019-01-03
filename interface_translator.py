@@ -29,6 +29,7 @@ parser.add_argument("output", help="Translated output config")
 parser.add_argument("-d", "--debug", help="Enable debuging to console",action="store_true")
 parser.add_argument("-s", "--save", help="Save mapping for future use")
 parser.add_argument("-m", "--map", help="Load existing map")
+parser.add_argument("-r", "--reverse", help="Reverse the translation map", action="store_true")
 print()
 
 args = parser.parse_args()
@@ -100,6 +101,17 @@ def trans_config():
 		print("func trans_config(): old_int: " + str(old_int))
 		print("func trans_config(): new_int: " + str(new_int))
 def save_map():
+	if args.reverse:
+		print()
+		print("Warning!")
+		print("You have selected to reverse AND save the map!")
+		print("Please confirm this is intended and the original map will not be overwritten")
+		if input("Is this OK (y/N): ").strip().lower().startswith("y"):
+			print("Saving map anyway!")
+			pass
+		else:
+			print("Map save aborted!")
+			return
 	if args.debug:
 		print("func save_map(): attempting to save map at file: " + args.save)
 	try:
@@ -144,6 +156,9 @@ config = open_config()
 discover(config)
 if args.map:
 	stripped_map = load_map()
+	if args.reverse:
+		rev_map = {v:k for k,v in stripped_map.items()}
+		stripped_map = rev_map
 	fixup = int_array_fixup(stripped_map)
 	old_int = list(fixup[0])
 	new_int = list(fixup[1])
