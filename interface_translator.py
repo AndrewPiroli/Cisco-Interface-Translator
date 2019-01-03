@@ -39,12 +39,12 @@ new_int = []
 stripped_map = {}
 
 def discover(config):
-	for index, line in enumerate(config):
+	for idx, line in enumerate(config):
 		if line.strip().startswith("interface "):
-			int_index.append(index)
+			int_index.append(idx)
 			if args.debug:
-				print("func discover(config): new interface discovered: " + str(config[index].strip()))
-				print("func discover(config): new interface discovered at idx: " + str(index))
+				print("func discover(config): new interface discovered: " + str(config[idx].strip()))
+				print("func discover(config): new interface discovered at idx: " + str(idx))
 
 def open_config():
 	if args.debug:
