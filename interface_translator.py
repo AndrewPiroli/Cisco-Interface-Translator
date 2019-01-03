@@ -4,64 +4,117 @@ parser = argparse.ArgumentParser()
 parser.add_argument("input", help="Initial config file")
 parser.add_argument("output", help="Translated output config")
 parser.add_argument("-d", "--debug", help="Enable debuging to console",action="store_true")
-#parser.add_argument("-s", "--save", help="Save mapping for future use")
-#parser.add_argument("-m", "--map", help="Load existing map")
+parser.add_argument("-s", "--save", help="Save mapping for future use")
+parser.add_argument("-m", "--map", help="Load existing map")
 print()
 
 args = parser.parse_args()
 config = []
 int_index = []
-interfaces = []
 old_int = []
 new_int = []
+stripped_map = {}
 
 def discover(config):
 	for index, line in enumerate(config):
 		if line.strip().startswith("interface "):
 			int_index.append(index)
 			if args.debug:
-				print("new index: " + str(index))
+				print("func discover(config): new interface discovered: " + str(config[index].strip()))
+				print("func discover(config): new interface discovered at idx: " + str(index))
 
-try:
-	infile = open(args.input, "r")
-	if infile.mode == "r":
+def open_config():
+	if args.debug:
+		print("func open_config(): attempting to open file at: " + args.input)
+	try:
+		infile = open(args.input, "r")
 		config = infile.readlines()
-	else:
-		raise Exception("Not this one chief: input file")
-except Exception as e:
-	print("Error opening input file")
-	if args.debug:
-		print()
+		infile.close()
+	except Exception as e:
+		print("Error reading input file!")
 		print(e)
-
-if args.debug:
-	print(config)
-	print()
-discover(config)
-for ints in int_index:
-	old_int.append(config[ints])
-	print("Old interface: ")
-	print(config[ints])
-	answer = input("new Interface: ")
-	if answer.startswith("pass"):
-		continue
-		new_int.append("pass")
-	else:
-		config[ints] = "interface " + answer + "\r\n"
-		new_int.append("interface " + answer + "\r\n")
-print(config)
-mapping = dict(zip(old_int, new_int))
-if args.debug:
-	print("Map: ")
-	print(mapping)
-try:
-	outfile = open(args.output, "w")
-	if outfile.mode == "w":
+		if args.debug:
+			print("error in open_config()")
+			print(repr(e))
+	if args.debug:
+		print("Configuration recieved successfully!")
+		print("Dumping config to console:")
+		print(config)
+		print()
+	return config
+def save_config():
+	if args.debug:
+		print("func save_config(): attempting save to file: " + args.output)
+	try:
+		outfile = open(args.output, "w+")
 		outfile.writelines(config)
-	else:
-		raise Exception("Not this one chief: outputfile")
-except Exception as e:
-	print("Error opening output file")
-	if args.debug:
-		print()
+		outfile.close()
+	except Exception as e:
+		print("Error writing config")
 		print(e)
+		if args.debug:
+			print("error in save_config()")
+			print(repr(e))
+def trans_config():
+	if args.debug:
+		print("func trans_config(): stripped_map = " + str(stripped_map))
+	for idx in int_index:
+		if config[idx].strip() in stripped_map:
+			print("Discovered interface inside existing map!")
+			print(config[idx].strip() + " -> " + stripped_map.get(config[idx].strip())) 
+			config[idx] = stripped_map.get(config[idx].strip()) + "\r\n"
+		else:
+			print("New interface discovered!")
+			old_int.append(config[idx].strip())
+			answer = input("Enter new interface name or pass for passthru: ").strip()
+			if answer.lower().startswith("pass"):
+				new_int.append("pass")
+			else:
+				config[idx] = "interface " + answer + "\r\n"
+				new_int.append("interface " + answer)
+	if args.debug:
+		print("func trans_config(): old_int: " + str(old_int))
+		print("func trans_config(): new_int: " + str(new_int))
+def save_map():
+	if args.debug:
+		print("func save_map(): attempting to save map at file: " + args.save)
+	try:
+		mapping = str(dict(zip(old_int, new_int)))
+		mapfile = open(args.save, "w+")
+		mapfile.write(mapping)
+		mapfile.close()
+	except Exception as e:
+		print("Error saving map file")
+		print(e)
+		if args.debug:
+			print("error in save_map()")
+			print(repr(e))
+def load_map():
+	if args.debug:
+		print("func load_map() attempting to open map at file: " + args.map)
+	try:
+		mapfile = open(args.map, "r")
+		map = mapfile.read()
+		if args.debug:
+			print("func load_map(): raw map text: " + map)
+		stripped_map = eval(map)
+	except Exception as e:
+		print("Error openening map")
+		print(e)
+		if args.debug:
+			print("Error in load_map()")
+			print(repr(e))
+	if args.debug:
+		print("func load_map(): stripped_map: " + str(stripped_map))
+	if not stripped_map:
+		return None
+	return stripped_map
+
+config = open_config()
+discover(config)
+if args.map:
+	stripped_map = load_map()
+trans_config()
+save_config()
+if args.save:
+	save_map()
