@@ -21,7 +21,11 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
 
+class SecurityException(Exception): #Define another Exception so we can specifically handle a security issue.
+	pass
+
 import argparse
+import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument("input", help="Initial config file")
@@ -134,7 +138,10 @@ def load_map():
 		map = mapfile.read()
 		if args.debug:
 			print("func load_map(): raw map text: " + map)
+		security_check(map)
 		stripped_map = eval(map)
+	except SecurityException as e:
+		sys.exit(e)
 	except Exception as e:
 		print("Error openening map")
 		print(e)
@@ -152,6 +159,12 @@ def int_array_fixup(map):
 	old_int = map.keys()
 	new_int = map.values()
 	return [old_int, new_int]
+def security_check(mapfile): #Screen the map file because we will call eval() on it, try to prevent code injection by the user
+	if any([disallowed in mapfile for disallowed in ["(", ")", "import", "def", "if", "else", "catch", "=", "with", "as"]]):
+		raise SecurityException("SecurityException: Map file failed security check! The map file should only contain a python dictionary, NOT code.")
+	else:
+		if args.debug:
+			print("security_check(mapfile): Map pass security check.")
 config = open_config()
 discover(config)
 if args.map:
