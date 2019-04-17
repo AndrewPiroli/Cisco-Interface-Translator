@@ -157,6 +157,8 @@ discover(config)
 if args.map:
 	stripped_map = load_map()
 	if args.reverse:
+		if args.debug:
+			print("main: reversing loaded map file")
 		rev_map = {v:k for k,v in stripped_map.items()}
 		stripped_map = rev_map
 	fixup = int_array_fixup(stripped_map)
