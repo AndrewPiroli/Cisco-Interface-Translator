@@ -25,13 +25,15 @@
 import argparse
 import sys
 
-class IntTranslate():
+
+class IntTranslate:
     def __init__(self):
         self.config = []
         self.int_index = []
         self.old_int = []
         self.new_int = []
         self.stripped_map = {}
+
     def discover(self):
         for idx, line in enumerate(self.config):
             if line.strip().startswith("interface "):
@@ -45,8 +47,7 @@ class IntTranslate():
                         "func discover(config): new interface discovered at idx: "
                         + str(idx)
                     )
-    
-    
+
     def open_config(self):
         if self.args.debug:
             print("func open_config(): attempting to open file at: " + self.args.input)
@@ -65,8 +66,7 @@ class IntTranslate():
             print("Dumping config to console:")
             print(self.config)
             print()
-    
-    
+
     def save_config(self):
         if self.args.debug:
             print("func save_config(): attempting save to file: " + self.args.output)
@@ -80,16 +80,21 @@ class IntTranslate():
             if self.args.debug:
                 print("error in save_config()")
                 print(repr(e))
-    
-    
+
     def trans_config(self):
         if self.args.debug:
             print("func trans_config(): stripped_map = " + str(self.stripped_map))
         for idx in self.int_index:
             if self.config[idx].strip() in self.stripped_map:
                 print("Discovered interface inside existing map!")
-                print(self.config[idx].strip() + " -> " + self.stripped_map.get(self.config[idx].strip()))
-                self.config[idx] = self.stripped_map.get(self.config[idx].strip()) + "\n"
+                print(
+                    self.config[idx].strip()
+                    + " -> "
+                    + self.stripped_map.get(self.config[idx].strip())
+                )
+                self.config[idx] = (
+                    self.stripped_map.get(self.config[idx].strip()) + "\n"
+                )
             else:
                 print("New interface discovered!")
                 self.old_int.append(self.config[idx].strip())
@@ -105,8 +110,7 @@ class IntTranslate():
         if self.args.debug:
             print("func trans_config(): old_int: " + str(self.old_int))
             print("func trans_config(): new_int: " + str(self.new_int))
-    
-    
+
     def save_map(self):
         if self.args.reverse:
             print()
@@ -133,8 +137,7 @@ class IntTranslate():
             if self.args.debug:
                 print("error in save_map()")
                 print(repr(e))
-    
-    
+
     def load_map(self):
         self.stripped_map = None
         if self.args.debug:
@@ -160,15 +163,15 @@ class IntTranslate():
             return {}
         if self.args.debug:
             print("func load_map(): stripped_map: " + str(self.stripped_map))
-    
+
     @staticmethod
     def int_array_fixup(map):
         old_int = map.keys()
         new_int = map.values()
         return [old_int, new_int]
-    
-    def security_check(self,
-        mapfile,
+
+    def security_check(
+        self, mapfile,
     ):  # Screen the map file because we will call eval() on it, try to prevent code injection by the user
         if any(
             [
@@ -193,7 +196,7 @@ class IntTranslate():
         else:
             if self.args.debug:
                 print("security_check(mapfile): Map pass security check.")
-    
+
     def main(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("input", help="Initial config file")
@@ -224,5 +227,7 @@ class IntTranslate():
         self.save_config()
         if self.args.save:
             self.save_map()
+
+
 if __name__ == "__main__":
     IntTranslate().main()
