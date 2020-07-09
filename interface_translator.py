@@ -22,12 +22,6 @@
 # SOFTWARE.
 
 
-class SecurityException(
-    Exception
-):  # Define another Exception so we can specifically handle a security issue.
-    pass
-
-
 import argparse
 import sys
 
@@ -168,7 +162,7 @@ def load_map():
             print("func load_map(): raw map text: " + map)
         security_check(map)
         stripped_map = eval(map)
-    except SecurityException as e:
+    except AssertionError as e:
         sys.exit(e)
     except Exception as e:
         print("Error openening map")
@@ -211,8 +205,8 @@ def security_check(
             ]
         ]
     ):
-        raise SecurityException(
-            "SecurityException: Map file failed security check! The map file should only contain a python dictionary, NOT code."
+        raise AssertionError(
+            "Security: Map file failed security check! The map file should only contain a python dictionary, NOT code."
         )
     else:
         if args.debug:
